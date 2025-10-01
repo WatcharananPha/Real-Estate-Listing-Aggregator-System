@@ -1,0 +1,13 @@
+services:
+  scraper:
+    build: .
+    container_name: facebook-scraper
+    # Pass environment variables from .env file
+    env_file:
+      - .env
+    # Mount volumes to sync data between host and container
+    volumes:
+      # Mount current directory to /app in container
+      - .:/app
+      # Mount a local folder to be used as the persistent chrome profile
+      - ./chrome-profile:/root/chrome-profile

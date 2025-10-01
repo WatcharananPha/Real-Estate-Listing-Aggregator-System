@@ -1,1 +1,10 @@
 .env
+__pycache__/
+*.pyc
+instance/
+venv/
+.env
+.DS_Store
+chrome-profile/
+.vscode/
+Thumbs.db
