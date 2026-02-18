@@ -1,3 +1,7 @@
 python-dotenv
 undetected-chromedriver
 selenium
+webdriver-manager
+openai
+pandas
+gspread

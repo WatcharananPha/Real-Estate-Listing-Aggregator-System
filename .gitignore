@@ -9,3 +9,5 @@ chrome-profile/
 .vscode/
 Thumbs.db
 real-estatescraper-9a627130f076.json
+.venv
+Scraping
