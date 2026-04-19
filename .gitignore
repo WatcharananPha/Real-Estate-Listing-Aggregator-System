@@ -12,3 +12,7 @@ real-estatescraper-9a627130f076.json
 .venv
 Scraping
 fb_chrome_profile
+facebook-scraping/chrome_profile
+chrome_profile/
+chrome_profile/Default/
+chrome_profile/component_crx_cache/
