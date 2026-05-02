@@ -5,3 +5,9 @@ webdriver-manager
 openai
 pandas
 gspread
+oauth2client
+streamlit
+httpx
+streamlit
+python-dotenv
+openai
