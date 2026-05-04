@@ -37,6 +37,7 @@ PROFILE_PATH = BASE_DIR / "chrome_profile"
 
 MAX_STAGNANT = 10
 SCROLL_SIZE = 3000
+MAX_POSTS = 200
 START_GROUP_IDX = int(input("Enter START_GROUP_IDX (default 1): ") or 1)
 MODEL_NAME = "typhoon-v2.5-30b-a3b-instruct"
 MAX_WORKERS = 18
@@ -739,9 +740,21 @@ def process_group(
         found_old_post = False
 
         for _ in range(300):
+            if saved_count >= MAX_POSTS:
+                logger.info(
+                    f"[Group {group_idx}/{total_groups}] Reached post limit ({saved_count}/{MAX_POSTS}). Total saved this group: {saved_count}"
+                )
+                break
+
             _wait_for_backpressure()
             extracted, found_old = atomic_fb_extract(driver)
             found_old_post = found_old_post or found_old
+
+            if found_old_post:
+                logger.info(
+                    f"[Group {group_idx}/{total_groups}] Old post detected ({saved_count}/{MAX_POSTS}). Total saved this group: {saved_count}"
+                )
+                break
 
             if not extracted:
                 stagnant_count += 1
@@ -763,26 +776,23 @@ def process_group(
                 if new_items:
                     stagnant_count = 0
                     for item in new_items:
+                        if saved_count >= MAX_POSTS:
+                            break
                         seen_urls.add(item["Post_URL"])
                         fut = executor.submit(worker_process_and_save, item)
                         _register_future(fut)
                         saved_count += 1
                     logger.info(
-                        f"[Group {group_idx}/{total_groups}] Collected {len(new_items)} new items (Total saved this group: {saved_count})"
+                        f"[Group {group_idx}/{total_groups}] {saved_count}/{MAX_POSTS} - Collected {len([i for i in new_items if saved_count <= MAX_POSTS])} new items. Total saved this group: {saved_count}"
                     )
                 elif truncated_count:
                     stagnant_count = 0
                 else:
                     stagnant_count += 1
 
-            if found_old_post or stagnant_count >= MAX_STAGNANT:
-                reason = (
-                    "Found post older than 24h"
-                    if found_old_post
-                    else f"Stagnant: {stagnant_count}"
-                )
+            if stagnant_count >= MAX_STAGNANT:
                 logger.info(
-                    f"[Group {group_idx}/{total_groups}] Stop condition met. ({reason}, Saved: {saved_count})"
+                    f"[Group {group_idx}/{total_groups}] Stagnant after {stagnant_count} iterations ({saved_count}/{MAX_POSTS}). Total saved this group: {saved_count}"
                 )
                 break
 
